@@ -1,17 +1,30 @@
-name: Build APK
+name: Build Android APK
 on:
   push:
     branches: [ main ]
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build with Buildozer
-        uses: ArtemSerebrenninkov/buildozer-action@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          command: buildozer android debug
-      - name: Upload APK
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.33 kivy kivymd
+
+      - name: Build with Buildozer
+        run: |
+          yes | buildozer -v android debug
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
           name: TrustPoint-APK
